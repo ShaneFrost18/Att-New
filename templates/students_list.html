@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="content">
+        <h1>Students List</h1>
+        <table class="students-table">
+            <tr>
+                <th>Name</th>
+                <th>Roll Number</th>
+                <th>Subject</th>
+                <th>Present Attendance</th>
+                <th>Total Attendance</th>
+                <th>Attendance Percentage</th>
+            </tr>
+            {% for student_data in students_data %}
+                <tr>
+                    <td rowspan="{{ subjects|length }}">{{ student_data['name'] }}</td>
+                    <td rowspan="{{ subjects|length }}">{{ student_data['roll_no'] }}</td>
+                    {% for attendance_data in student_data['attendance_data'] %}
+                        <td>{{ attendance_data['subject'] }}</td>
+                        <td>{{ attendance_data['present_attendance'] }}</td>
+                        <td>{{ attendance_data['total_attendance'] }}</td>
+                        <td>{% if attendance_data['total_attendance'] > 0 %}{{ "%.2f" % (attendance_data['present_attendance'] / attendance_data['total_attendance'] * 100) }}%{% else %}N/A{% endif %}</td>
+                    </tr>
+                    {% if not loop.last %}
+                        <tr>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+        </table>
+    </div>
+
+    <style>
+        .content {
+            margin-left: 200px; /* Adjust the margin to match your side menu width */
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .students-table th,
+        .students-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .students-table th {
+            background-color: #f5f5f5;
+        }
+
+        .students-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+{% endblock %}

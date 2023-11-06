@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="content">
+        <h1>Welcome, {{ session['username'] }}</h1>
+
+        <h2>Total Classes per Subject</h2>
+        <table class="subject-table">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Total Classes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subject_data %}
+                    <tr>
+                        <td>{{ subject[0] }}</td>
+                        <td>{{ subject[1] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Defaulters List</h2>
+        {% if defaulters_data %}
+            <table class="defaulters-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Roll No</th>
+                        <th>Subject</th>
+                        <th>Total Attendance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for defaulter in defaulters_data %}
+                        <tr>
+                            <td>{{ defaulter[0] }}</td>
+                            <td>{{ defaulter[1] }}</td>
+                            <td>{{ defaulter[2] }}</td>
+                            <td>{{ defaulter[3] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No defaulters found.</p>
+        {% endif %}
+    </div>
+
+    <style>
+        .subject-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .subject-table th,
+        .subject-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .subject-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .subject-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .defaulters-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .defaulters-table th,
+        .defaulters-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .defaulters-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .defaulters-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+
+{% endblock %}

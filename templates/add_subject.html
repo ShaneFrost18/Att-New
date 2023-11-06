@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="content">
+        <h1>Add Subject</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'error' %}
+                        <div class="alert alert-danger">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form class="add-subject-form" method="post" action="{{ url_for('add_subject') }}">
+            <label for="subject">Subject:</label>
+            <input type="text" name="subject_name" placeholder="Subject Name" required>
+            <br><br>
+            <input type="submit" value="Add Subject">
+        </form>
+    </div>
+
+    <style>
+        .content {
+            margin-left: 200px; /* Adjust the margin to match your side menu width */
+        }
+
+        .add-subject-form {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-subject-form label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .add-subject-form input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .add-subject-form input[type="submit"] {
+            background-image: linear-gradient(to bottom, #007bff, #0056b3);
+            background-color: #333;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .add-subject-form input[type="submit"]:hover {
+            background-image: linear-gradient(to bottom, #0056b3, #007bff);
+        }
+
+        .alert {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+    </style>
+{% endblock %}

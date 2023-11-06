@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Management</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+    
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 200px;
+            background-color: #000000;
+            color: #fff;
+            padding: 20px;
+        }
+    
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+    
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+    
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+        }
+    
+        .logout {
+            position: absolute;
+            bottom: 60px;
+            left: 20px;
+        }
+    
+        .logout button {
+            color: #fff;
+            background-color: #555;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    
+        .logout button:hover {
+            background-color: #444;
+        }
+    
+        .content {
+            margin-left: 200px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>Teacher's Dashboard</h1>
+        <ul>
+            <li><a href="{{ url_for('home') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('add_student') }}">Add Student</a></li>
+            <li><a href="{{ url_for('add_subject') }}">Add Subject</a></li> 
+            <li><a href="{{ url_for('mark_attendance') }}">Mark Attendance</a></li>
+            <li><a href="{{ url_for('students_list') }}">View Attendance</a></li>
+        </ul>
+        <div class="logout">
+            <form action="{{ url_for('logout') }}" method="POST">
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
