@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-import sqlite3
+import mysql.connector
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -8,30 +8,37 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 LOGIN_USERNAME = 'admin'
 LOGIN_PASSWORD = 'admin'
 
-# SQLite database connection
-conn = sqlite3.connect('attendance.db', check_same_thread=False)
+# MySQL database connection
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
+    'database': 'attendance',
+}
+
+conn = mysql.connector.connect(**db_config)
 c = conn.cursor()
 
 # Create students table if it doesn't exist
 c.execute('''CREATE TABLE IF NOT EXISTS students (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                roll_no INTEGER UNIQUE NOT NULL
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                roll_no INT UNIQUE NOT NULL
             )''')
 
 # Create subjects table if it doesn't exist
 c.execute('''CREATE TABLE IF NOT EXISTS subjects (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL UNIQUE
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL UNIQUE
             )''')
 
 # Create attendance table if it doesn't exist
 c.execute('''CREATE TABLE IF NOT EXISTS attendance (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                student_id INTEGER NOT NULL,
-                subject_id INTEGER NOT NULL,
-                date TEXT NOT NULL,
-                status TEXT NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                student_id INT NOT NULL,
+                subject_id INT NOT NULL,
+                date DATE NOT NULL,
+                status VARCHAR(50) NOT NULL,
                 FOREIGN KEY (student_id) REFERENCES students (id),
                 FOREIGN KEY (subject_id) REFERENCES subjects (id)
             )''')
@@ -86,7 +93,7 @@ def add_student():
         roll_no = request.form['roll_no']
 
         # Insert the student into the database
-        c.execute("INSERT INTO students (name, roll_no) VALUES (?, ?)", (name, roll_no))
+        c.execute("INSERT INTO students (name, roll_no) VALUES (%s, %s)", (name, roll_no))
         conn.commit()
 
         return redirect(url_for('students_list'))
@@ -99,7 +106,7 @@ def add_subject():
         subject_name = request.form['subject_name']
 
         # Insert the subject into the database
-        c.execute("INSERT INTO subjects (name) VALUES (?)", (subject_name,))
+        c.execute("INSERT INTO subjects (name) VALUES (%s)", (subject_name,))
         conn.commit()
 
         return redirect(url_for('home'))
@@ -114,7 +121,7 @@ def mark_attendance():
         students = request.form.getlist('students')
 
         # Check if attendance for the given date and subject already exists
-        c.execute("SELECT COUNT(*) FROM attendance WHERE date = ? AND subject_id = ?", (date, subject_id))
+        c.execute("SELECT COUNT(*) FROM attendance WHERE date = %s AND subject_id = %s", (date, subject_id))
         attendance_count = c.fetchone()[0]
 
         if attendance_count > 0:
@@ -123,7 +130,7 @@ def mark_attendance():
 
         for student_id in students:
             status = request.form.get(f'status_{student_id}')
-            c.execute("INSERT INTO attendance (student_id, subject_id, date, status) VALUES (?, ?, ?, ?)",
+            c.execute("INSERT INTO attendance (student_id, subject_id, date, status) VALUES (%s, %s, %s, %s)",
                       (student_id, subject_id, date, status))
 
         conn.commit()
@@ -161,11 +168,11 @@ def students_list():
             subject_name = subject[1]
 
             # Calculate attendance for each subject
-            c.execute("SELECT COUNT(*) FROM attendance WHERE student_id=? AND subject_id=? AND status='Present'",
+            c.execute("SELECT COUNT(*) FROM attendance WHERE student_id=%s AND subject_id=%s AND status='Present'",
                       (student_id, subject_id))
             present_attendance = c.fetchone()[0]
 
-            c.execute("SELECT COUNT(*) FROM attendance WHERE student_id=? AND subject_id=?",
+            c.execute("SELECT COUNT(*) FROM attendance WHERE student_id=%s AND subject_id=%s",
                       (student_id, subject_id))
             total_attendance = c.fetchone()[0]
 
