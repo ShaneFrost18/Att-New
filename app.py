@@ -23,7 +23,8 @@ c = conn.cursor()
 c.execute('''CREATE TABLE IF NOT EXISTS students (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
-                roll_no INT UNIQUE NOT NULL
+                roll_no INT UNIQUE NOT NULL,
+                attendance_percentage DECIMAL(5, 2) DEFAULT 0
             )''')
 
 # Create subjects table if it doesn't exist
@@ -39,9 +40,46 @@ c.execute('''CREATE TABLE IF NOT EXISTS attendance (
                 subject_id INT NOT NULL,
                 date DATE NOT NULL,
                 status VARCHAR(50) NOT NULL,
+                attendance_percentage DECIMAL(5, 2) DEFAULT 0,  -- Add this line
                 FOREIGN KEY (student_id) REFERENCES students (id),
                 FOREIGN KEY (subject_id) REFERENCES subjects (id)
             )''')
+
+# Drop the trigger if it already exists
+c.execute("DROP TRIGGER IF EXISTS update_student_attendance_percentage")
+
+# Trigger to update attendance percentage when inserting or updating attendance records for students
+c.execute('''CREATE TRIGGER update_student_attendance_percentage
+            AFTER INSERT ON attendance
+            FOR EACH ROW
+            BEGIN
+                UPDATE students
+                SET attendance_percentage = (
+                    SELECT (SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) * 100.0 / COUNT(id))
+                    FROM attendance
+                    WHERE student_id = NEW.student_id
+                )
+                WHERE id = NEW.student_id;
+            END''')
+
+# Drop the trigger if it already exists
+c.execute("DROP TRIGGER IF EXISTS prevent_student_deletion")
+
+# Trigger to prevent deletion of students with associated attendance records
+c.execute('''CREATE TRIGGER prevent_student_deletion
+            BEFORE DELETE ON students
+            FOR EACH ROW
+            BEGIN
+                DECLARE attendance_count INT;
+                SELECT COUNT(*) INTO attendance_count
+                FROM attendance
+                WHERE student_id = OLD.id;
+
+                IF attendance_count > 0 THEN
+                    SIGNAL SQLSTATE '45000'
+                    SET MESSAGE_TEXT = 'Cannot delete a student with attendance records';
+                END IF;
+            END''')
 
 @app.route('/')
 def home():
@@ -130,6 +168,7 @@ def mark_attendance():
 
         for student_id in students:
             status = request.form.get(f'status_{student_id}')
+            # Exclude attendance_percentage from the column list
             c.execute("INSERT INTO attendance (student_id, subject_id, date, status) VALUES (%s, %s, %s, %s)",
                       (student_id, subject_id, date, status))
 
